@@ -2,7 +2,7 @@
 
 namespace Practice1.Services.EntityFramework.Entities
 {
-    internal class PracticeContext: DbContext
+    public class PracticeContext: DbContext
     {
         public PracticeContext(DbContextOptions options)
             : base(options)
