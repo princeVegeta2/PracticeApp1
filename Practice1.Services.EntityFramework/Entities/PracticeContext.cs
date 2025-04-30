@@ -17,6 +17,8 @@ namespace Practice1.Services.EntityFramework.Entities
 
         public DbSet<Like> Likes { get; set; }
 
+        public DbSet<VerifiedUser> VerifiedUsers { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Configure friendships
@@ -45,6 +47,14 @@ namespace Practice1.Services.EntityFramework.Entities
                 .HasOne(l => l.Post)
                 .WithMany(p => p.Likes)
                 .HasForeignKey(l => l.PostId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Configure verified users
+            // One to one
+            modelBuilder.Entity<VerifiedUser>()
+                .HasOne(v => v.User)
+                .WithOne(u => u.VerifiedUser)
+                .HasForeignKey<VerifiedUser>(v => v.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
 

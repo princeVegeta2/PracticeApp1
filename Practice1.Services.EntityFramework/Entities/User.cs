@@ -36,5 +36,7 @@ namespace Practice1.Services.EntityFramework.Entities
 
         public ICollection<Like> Likes { get; set; } = new List<Like>();
 
+        public VerifiedUser? VerifiedUser { get; set; } = null;
+
     }
 }
