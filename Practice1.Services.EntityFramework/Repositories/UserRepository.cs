@@ -44,24 +44,79 @@ namespace Practice1.Services.EntityFramework.Repositories
             }
         }
 
-        public Task<IList<RepositoryUser>> GetAllUsers()
+        public async Task<IList<RepositoryUser>> GetAllUsers()
         {
-            throw new NotImplementedException();
+            try
+            {
+                List<RepositoryUser> usersLean = await _context.Users
+                    .Select(user => new RepositoryUser
+                    {
+                        Id = user.Id,
+                        Username = user.Username,
+                        Email = user.Email,
+                        IsVerified = user.VerifiedUser != null,
+                        FriendsCount = 0, // omitted to avoid loading navigation properties
+                        PostTypes = new List<string>(),
+                        FriendUsernames = new List<string>(),
+                    }).ToListAsync();
+
+                return usersLean;
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"An error occurred while retrieving all users: {ex.Message}");
+            }
         }
 
-        public Task<RepositoryUser> GetUserByEmailAsync(string email)
+        public async Task<RepositoryUser> GetUserByEmailAsync(string email)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var user = await _context.Users
+                    .Include(u => u.Posts)
+                    .Include(u => u.Friends).ThenInclude(f => f.Friend)
+                    .Include(u => u.FriendOf).ThenInclude(f => f.User)
+                    .Include(u => u.Likes).ThenInclude(l => l.Post)
+                    .Include(u => u.VerifiedUser)
+                    .FirstOrDefaultAsync(u => u.Email == email);
+
+                if (user == null)
+                {
+                    throw new UserNotFoundException($"User with email {email} not found.");
+                }
+
+                return PracticeMapper.MapUser(user);
+            }
+            catch (Exception ex)
+            {
+                throw new UserNotFoundException($"An error occurred while retrieving the user by email: {ex.Message}", ex);
+            }
         }
 
-        public Task<RepositoryUser> GetUserByUsernameAsync(string username)
+        public async Task<RepositoryUser> GetUserByUsernameAsync(string username)
         {
-            throw new NotImplementedException();
-        }
+           try
+            {
+                var user = await _context.Users
+                    .Include(u => u.Posts)
+                    .Include(u => u.Friends).ThenInclude(f => f.Friend)
+                    .Include(u => u.FriendOf).ThenInclude(f => f.User)
+                    .Include(u => u.Likes).ThenInclude(l => l.Post)
+                    .Include(u => u.VerifiedUser)
+                    .FirstOrDefaultAsync(u => u.Username == username);
 
-        Task<RepositoryUser> IUserRepository.GetUserByIdAsync(int id)
-        {
-            throw new NotImplementedException();
+                if (user == null)
+                {
+                    throw new UserNotFoundException($"User with email {username} not found.");
+                }
+
+                return PracticeMapper.MapUser(user);
+            }
+            catch (Exception ex)
+            {
+                throw new UserNotFoundException($"An error occurred while retrieving the user by email: {ex.Message}", ex);
+            }
         }
     }
 }
