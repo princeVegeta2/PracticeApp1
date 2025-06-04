@@ -1,6 +1,7 @@
 ﻿using Practice1.Services.EntityFramework.Entities;
 using Practice1.Services.Repositories;
 using RepoUser = Practice1.Services.Repositories.User;
+using RepoLike = Practice1.Services.Repositories.Like;
 using EntityUser = Practice1.Services.EntityFramework.Entities.User;
 
 namespace Practice1.Services.EntityFramework.Helpers
@@ -36,5 +37,19 @@ namespace Practice1.Services.EntityFramework.Helpers
                     .ToList()
             };
         }
+
+        public static RepoLike MapLike(Entities.Like like)
+        {
+            return new RepoLike
+            {
+                Id = like.Id,
+                UserId = like.UserId,
+                PostId = like.PostId,
+                CreatedAt = like.CreatedAt
+            };
+        }
+
+
+
     }
 }
