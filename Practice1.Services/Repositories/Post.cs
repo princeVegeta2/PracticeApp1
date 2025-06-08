@@ -6,19 +6,15 @@ using System.Threading.Tasks;
 
 namespace Practice1.Services.Repositories
 {
-    public class Like
+    public class Post
     {
         public int Id { get; set; }
-
         public int UserId { get; init; }
-
         public required User User { get; init; }
-
-        public int PostId { get; init; }
-        public required Post Post { get; init; }
-
+        public string Type { get; set; }
+        public int TotalLikes { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public ICollection<Like> Likes { get; set; } = new List<Like>();
     }
 }

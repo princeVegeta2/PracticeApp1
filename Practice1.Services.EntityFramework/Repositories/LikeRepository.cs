@@ -3,13 +3,7 @@ using Practice1.Services.EntityFramework.Entities;
 using Practice1.Services.Repositories;
 using Practice1.Services.Exceptions;
 using RepoLike = Practice1.Services.Repositories.Like;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Practice1.Services.EntityFramework.Helpers;
-using SQLitePCL;
 
 namespace Practice1.Services.EntityFramework.Repositories
 {
@@ -88,22 +82,27 @@ namespace Practice1.Services.EntityFramework.Repositories
         {
             try
             {
-                List<RepoLike> likes = await _context.Likes
-                    .Select(like => new RepoLike
-                    {
-                        Id = like.Id,
-                        UserId = like.UserId,
-                        User = like.User != null ? PracticeMapper.MapUser(like.User) : null,
-                        PostId = like.PostId,
-                        CreatedAt = like.CreatedAt
-                    }).ToListAsync();
+                var likes = await _context.Likes
+                    .Include(l => l.User)
+                    .Include(l => l.Post)
+                    .Where(l => l.UserId == userId)
+                    .ToListAsync();
 
-                if (likes == null || !likes.Any())
+                if (!likes.Any())
                 {
                     throw new LikeNotFoundException($"No likes found for user with ID {userId}.");
                 }
 
-                return likes;
+                return likes.Select(like => new RepoLike
+                {
+                    Id = like.Id,
+                    UserId = like.UserId,
+                    User = PracticeMapper.MapUser(like.User),
+                    PostId = like.PostId,
+                    Post = PracticeMapper.MapPost(like.Post),
+                    CreatedAt = like.CreatedAt,
+                    UpdatedAt = like.UpdatedAt
+                }).ToList();
             }
             catch (Exception ex)
             {
@@ -111,6 +110,5 @@ namespace Practice1.Services.EntityFramework.Repositories
             }
         }
 
-        
     }
 }
